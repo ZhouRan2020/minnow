@@ -51,7 +51,9 @@ public:
   uint64_t bytes_pending() const;
 private:
   std::set<block_node> blocks_ {};
+
   uint64_t first_unassembled_index { 0 };
+
   bool end_check{false};
   uint64_t end_idx{};
   void push_substring(block_node&,uint64_t);
