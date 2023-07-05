@@ -5,7 +5,7 @@
 #include <string_view>
 #include <version>
 using namespace std;
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ), data_queue_ {}, data_view_ {} {}
+ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ), data_queue_(), data_view_() {}
 void Writer::push( string data )
 {
   if ( has_error_ ) {

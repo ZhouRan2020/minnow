@@ -10,9 +10,10 @@
 
 class Wrap32
 {
-  static constexpr uint64_t set32zero=UINT64_MAX<<32;
-  static constexpr uint64_t width32=1UL<<32;
-  static constexpr uint64_t lastbase=UINT64_MAX-width32;
+  static constexpr uint64_t set32zero = UINT64_MAX << 32;
+  static constexpr uint64_t width32 = 1UL << 32;
+  static constexpr uint64_t lastbase = UINT64_MAX - width32;
+
 protected:
   uint32_t raw_value_ {};
 

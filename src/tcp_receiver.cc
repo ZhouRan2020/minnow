@@ -16,7 +16,7 @@ void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, W
   if ( !has_syn ) {
     return;
   }
-  uint64_t fi = message.seqno.unwrap( isn, inbound_stream.bytes_pushed() ) - !message.SYN;
+  const uint64_t fi = message.seqno.unwrap( isn, inbound_stream.bytes_pushed() ) - !message.SYN;
   reassembler.insert( fi, message.payload.release(), message.FIN, inbound_stream );
 }
 

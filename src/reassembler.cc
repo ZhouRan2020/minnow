@@ -10,32 +10,32 @@ void Reassembler::merge( block_node& bn, set<block_node>::iterator bo )
     blocks_.insert( bn );
     return;
   }
-  if ( bn.begin < bo->begin && bn.end() <= bo->end() ) {//1
-    bn.data = bn.data.substr( 0, bo->begin-bn.begin );
+  if ( bn.begin < bo->begin && bn.end() <= bo->end() ) { // 1
+    bn.data = bn.data.substr( 0, bo->begin - bn.begin );
     blocks_.insert( bn );
     return;
   }
-  if ( bn.begin >= bo->begin && bn.end() <= bo->end() ) {//2
+  if ( bn.begin >= bo->begin && bn.end() <= bo->end() ) { // 2
     return;
   }
-  if ( bn.end() <= bo->begin ) {//5
+  if ( bn.end() <= bo->begin ) { // 5
     blocks_.insert( bn );
     return;
   }
-  if ( bn.begin >= bo->end() ) {//6
+  if ( bn.begin >= bo->end() ) { // 6
     merge( bn, next( bo ) );
     return;
   }
-  if ( bn.begin >= bo->begin && bn.end() > bo->end() ) {//3
-    bn.data = bn.data.substr( bo->end() - bn.begin, bn.end()-bo->end() );
+  if ( bn.begin >= bo->begin && bn.end() > bo->end() ) { // 3
+    bn.data = bn.data.substr( bo->end() - bn.begin, bn.end() - bo->end() );
     bn.begin = bo->end();
     merge( bn, next( bo ) );
     return;
   }
-  if ( bn.begin < bo->begin && bn.end() > bo->end() ) {//4
-    block_node bnn { bn.begin, bn.data.substr( 0, bo->begin-bn.begin ) };
+  if ( bn.begin < bo->begin && bn.end() > bo->end() ) { // 4
+    const block_node bnn { bn.begin, bn.data.substr( 0, bo->begin - bn.begin ) };
     blocks_.insert( bnn );
-    bn.data = bn.data.substr( bo->end() - bn.begin, bn.end()-bo->end() );
+    bn.data = bn.data.substr( bo->end() - bn.begin, bn.end() - bo->end() );
     bn.begin = bo->end();
     merge( bn, next( bo ) );
     return;
@@ -50,11 +50,11 @@ void Reassembler::push_substring( block_node& bn, uint64_t first_unacceptable_in
     return;
   }
   if ( bn.begin < first_unassembled_index ) {
-    bn.data = bn.data.substr( first_unassembled_index - bn.begin, bn.end()-first_unassembled_index );
+    bn.data = bn.data.substr( first_unassembled_index - bn.begin, bn.end() - first_unassembled_index );
     bn.begin = first_unassembled_index;
   }
   if ( bn.end() > first_unacceptable_index ) {
-    bn.data = bn.data.substr( 0, first_unacceptable_index-bn.begin );
+    bn.data = bn.data.substr( 0, first_unacceptable_index - bn.begin );
   }
   set<block_node>::iterator blk;
   if ( blocks_.empty() ) {
@@ -82,8 +82,8 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     }
     return;
   }
-  uint64_t first_unacceptable_index = first_unassembled_index + output.available_capacity();
-  block_node bn { first_index, move( data ) };
+  const uint64_t first_unacceptable_index = first_unassembled_index + output.available_capacity();
+  block_node bn { first_index, std::move( data ) };
   push_substring( bn, first_unacceptable_index );
   while ( !blocks_.empty() && blocks_.begin()->begin == first_unassembled_index ) {
     output.push( blocks_.begin()->data );

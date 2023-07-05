@@ -9,17 +9,11 @@ struct block_node
 {
   uint64_t begin {};
   std::string data {};
-  inline uint64_t length() const
-  {
-    return data.length();
-  }
-  inline uint64_t end() const
-  {
-    return begin+length();
-  }
+  inline uint64_t length() const { return data.length(); }
+  inline uint64_t end() const { return begin + length(); }
   inline bool operator<( const block_node& t ) const
   {
-    bool res = begin < t.begin;
+    const bool res = begin < t.begin;
     return res;
   }
 };
@@ -49,13 +43,14 @@ public:
   void insert( uint64_t first_index, std::string data, bool is_last_substring, Writer& output );
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
+
 private:
   std::set<block_node> blocks_ {};
 
   uint64_t first_unassembled_index { 0 };
 
-  bool end_check{false};
-  uint64_t end_idx{};
-  void push_substring(block_node&,uint64_t);
-  void merge(block_node&,std::set<block_node>::iterator);
+  bool end_check { false };
+  uint64_t end_idx {};
+  void push_substring( block_node&, uint64_t );
+  void merge( block_node&, std::set<block_node>::iterator );
 };
