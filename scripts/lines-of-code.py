@@ -21,6 +21,8 @@ def count_lines(filename):
     report.check_returncode()
     loc = re.search(r'Total Physical Source Lines of Code \(SLOC\) * = (\d+)',
                     report.stdout.decode('ascii'))
+    # if loc is None:
+    #     return None
     return int(loc.group(1))
 
 
