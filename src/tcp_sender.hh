@@ -4,6 +4,8 @@
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
 #include "wrapping_integers.hh"
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <queue>
 // 作者：haha 链接：https
@@ -13,61 +15,60 @@
 class Timer
 {
 private:
-  uint64_t initial_RTO_ms_;
-  uint64_t curr_RTO_ms;
-  size_t time_ms_ { 0 };
   bool running_ { false };
+  size_t time_passed_ { 0 };
+
+  size_t initial_RTO_;
+  size_t current_RTO_;
 
 public:
-  explicit Timer( uint64_t init_RTO ) : initial_RTO_ms_( init_RTO ), curr_RTO_ms( init_RTO ) {}
+  explicit Timer( size_t initial_RTO_ms ) : initial_RTO_( initial_RTO_ms ), current_RTO_( initial_RTO_ ) {}
 
-  void start()
-  {
-    running_ = true;
-    time_ms_ = 0;
-  }
-
-  void stop() { running_ = false; }
-
-  bool is_running() const { return running_; }
-
-  bool is_expired() const { return running_ && ( time_ms_ >= curr_RTO_ms ); }
-
-  void tick( size_t const ms_since_last_tick )
+  void tick( size_t ms_since_last_tick )
   {
     if ( running_ ) {
-      time_ms_ += ms_since_last_tick;
+      time_passed_ += ms_since_last_tick;
     }
   }
 
-  void double_RTO() { curr_RTO_ms *= 2; }
+  void start()
+  {
+  //  assert( !running_ );
+    running_ = true;
+    time_passed_ = 0;
+  }
+  void stop()
+  {
+    assert( running_ );
+    running_ = false;
+  }
 
-  void reset_RTO() { curr_RTO_ms = initial_RTO_ms_; }
+  void reset_RTO() { current_RTO_ = initial_RTO_; }
+  void double_RTO() { current_RTO_ *= 2; }
+
+  bool is_running() const { return running_; }
+  bool is_expired() const { return running_ && time_passed_ >= current_RTO_; }
 };
+
 class TCPSender
 {
   Wrap32 isn_;
-  uint64_t initial_RTO_ms_;
+  size_t initial_RTO_ms_;
 
-  bool syn_ { false };
-  bool fin_ { false };
-  unsigned retransmit_cnt_ { 0 }; // consecutive re-transmit count
+  bool syn_pushed_{false};
+  bool fin_pushed_{false};
 
-  uint64_t acked_seqno_ { 0 };
-  uint64_t next_seqno_ { 0 };
-  uint16_t window_size_ { 1 };
-
-  uint64_t outstanding_cnt_ { 0 }; // sequence_numbers_in_flight
+  uint64_t acknoed_seqno_{0};
+  uint16_t window_size_{1};
   std::queue<TCPSenderMessage> outstanding_segments_ {};
-  std::queue<TCPSenderMessage> queued_segments_ {};
+  uint64_t outstanding_seqnos_{0};
+  std::queue<TCPSenderMessage> pushed_segments_ {};
+  uint64_t pushed_seqnos_{0};
+  uint64_t next_seqno_{0};
 
   Timer timer_ { initial_RTO_ms_ };
-
-  // 作者：haha
-  // 链接：https://zhuanlan.zhihu.com/p/642465322
-  // 来源：知乎
-  // 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-
+  uint64_t retransmit_cnt_{0};
+ 
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
   TCPSender( uint64_t initial_RTO_ms, std::optional<Wrap32> fixed_isn );
