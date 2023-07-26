@@ -15,14 +15,14 @@
 class Timer
 {
 private:
-  bool running_ { false };
   size_t time_passed_ { 0 };
+  size_t RTO_;
 
+  bool running_ { false };
   size_t initial_RTO_;
-  size_t current_RTO_;
 
 public:
-  explicit Timer( size_t initial_RTO_ms ) : initial_RTO_( initial_RTO_ms ), current_RTO_( initial_RTO_ ) {}
+  explicit Timer( size_t initial_RTO_ms ) : RTO_( initial_RTO_ms ), initial_RTO_( initial_RTO_ms ) {}
 
   void tick( size_t ms_since_last_tick )
   {
@@ -33,42 +33,48 @@ public:
 
   void start()
   {
-  //  assert( !running_ );
+    //  assert( !running_ );
     running_ = true;
     time_passed_ = 0;
   }
+
   void stop()
   {
     assert( running_ );
     running_ = false;
   }
 
-  void reset_RTO() { current_RTO_ = initial_RTO_; }
-  void double_RTO() { current_RTO_ *= 2; }
+  void reset_RTO() { RTO_ = initial_RTO_; }
+  void double_RTO() { RTO_ *= 2; }
 
   bool is_running() const { return running_; }
-  bool is_expired() const { return running_ && time_passed_ >= current_RTO_; }
+  bool is_expired() const { return running_ && time_passed_ >= RTO_; }
 };
 
 class TCPSender
 {
+
   Wrap32 isn_;
   size_t initial_RTO_ms_;
 
-  bool syn_pushed_{false};
-  bool fin_pushed_{false};
-
-  uint64_t acknoed_seqno_{0};
-  uint16_t window_size_{1};
   std::queue<TCPSenderMessage> outstanding_segments_ {};
-  uint64_t outstanding_seqnos_{0};
-  std::queue<TCPSenderMessage> pushed_segments_ {};
-  uint64_t pushed_seqnos_{0};
-  uint64_t next_seqno_{0};
-
+  uint64_t outstanding_seqnos_ { 0 };
+  uint64_t acknoed_seqno_ { 0 };
   Timer timer_ { initial_RTO_ms_ };
-  uint64_t retransmit_cnt_{0};
- 
+  uint64_t retransmit_cnt_ { 0 };
+
+  bool retx_{false};
+  TCPSenderMessage retx_seg_{};
+
+  std::deque<TCPSenderMessage> pushed_segments_ {};
+  uint64_t pushed_seqnos_ { 0 };
+ // uint64_t retx_seqnos_{0};
+  uint64_t next_seqno_ { 0 };
+  uint16_t window_size_ { 1 };
+
+  bool syn_pushed_ { false };
+  bool fin_pushed_ { false };
+
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
   TCPSender( uint64_t initial_RTO_ms, std::optional<Wrap32> fixed_isn );
