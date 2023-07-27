@@ -2,14 +2,18 @@
 
 #include "address.hh"
 #include "ethernet_frame.hh"
+#include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
 
+#include <cstdint>
 #include <iostream>
 #include <list>
 #include <optional>
 #include <queue>
 #include <unordered_map>
 #include <utility>
+
+#include <map>
 
 // A "network interface" that connects IP (the internet layer, or network layer)
 // with Ethernet (the network access layer, or link layer).
@@ -41,6 +45,18 @@ private:
   // IP (known as Internet-layer or network-layer) address of the interface
   Address ip_address_;
 
+  std::map<uint32_t, std::pair<EthernetAddress, size_t>> ip2ether_ {};
+
+  std::queue<EthernetFrame> out_frames_ {};
+
+  std::map<uint32_t, size_t> arp_timer_ {};
+
+  std::map<uint32_t, std::queue<InternetDatagram>> waited_dgrams_ {};
+
+  // 作者：haha
+  // 链接：https://zhuanlan.zhihu.com/p/642466343
+  // 来源：知乎
+  // 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
   // addresses
