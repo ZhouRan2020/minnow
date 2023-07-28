@@ -63,12 +63,12 @@ class TCPSender
   Timer timer_ { initial_RTO_ms_ };
   uint64_t retransmit_cnt_ { 0 };
 
-  bool retx_{false};
-  TCPSenderMessage retx_seg_{};
+  bool retx_ { false };
+  TCPSenderMessage retx_seg_ {};
 
   std::deque<TCPSenderMessage> pushed_segments_ {};
   uint64_t pushed_seqnos_ { 0 };
- // uint64_t retx_seqnos_{0};
+  // uint64_t retx_seqnos_{0};
   uint64_t next_seqno_ { 0 };
   uint16_t window_size_ { 1 };
 

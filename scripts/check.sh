@@ -2,4 +2,4 @@
 cd build
 make
 cd ..
-cmake --build build --target check4
+cmake --build build --target check5

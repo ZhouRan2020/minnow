@@ -60,7 +60,7 @@ void TCPSender::push( Reader& outbound_stream )
 {
   uint16_t win_sz = window_size_ ? window_size_ : 1;
 
-  while (  win_sz > sequence_numbers_in_flight()  ) {
+  while ( win_sz > sequence_numbers_in_flight() ) {
 
     TCPSenderMessage msg;
 
@@ -77,7 +77,7 @@ void TCPSender::push( Reader& outbound_stream )
     }
     pushed_seqnos_ += msg.payload.size();
 
-    if ( !fin_pushed_ && outbound_stream.is_finished() &&  win_sz > sequence_numbers_in_flight() ) {
+    if ( !fin_pushed_ && outbound_stream.is_finished() && win_sz > sequence_numbers_in_flight() ) {
       fin_pushed_ = msg.FIN = true;
       pushed_seqnos_++;
     }
